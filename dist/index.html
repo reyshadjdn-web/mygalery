@@ -1,0 +1,602 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=1.0, user-scalable=no" />
+  <title>Galeri Jidan — Cloud Photo Storage</title>
+  
+  <!-- SEO & Meta -->
+  <meta name="description" content="Penyimpanan foto cloud pribadi yang aman, modern, dan mempertahankan kualitas asli untuk iOS, Android, dan Desktop." />
+  <meta name="theme-color" content="#07090e" />
+  <meta name="color-scheme" content="dark" />
+
+  <!-- PWA & iOS Safari meta tags -->
+  <link rel="manifest" href="/manifest.json" />
+  <link rel="icon" type="image/png" href="/icons/icon-192.png" />
+  <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="Galeri Jidan" />
+  
+  <!-- CSS -->
+  <script type="module" crossorigin src="/assets/index-CHWdET1f.js"></script>
+  <link rel="stylesheet" crossorigin href="/assets/index-DZ6rpQMF.css">
+</head>
+<body>
+
+  <!-- ==================== AUTH VIEW (LANDING / LOGIN / REGISTER) ==================== -->
+  <div id="view-auth" class="auth-wrapper" style="display: none; min-height: 100vh; padding: 24px 16px;">
+    <div class="auth-hero-box glass-panel glow-effect">
+      <div style="display: flex; align-items: center; justify-content: center; gap: 12px; margin-bottom: 24px;">
+        <div class="brand-icon">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2">
+            <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path>
+            <circle cx="12" cy="13" r="4"></circle>
+          </svg>
+        </div>
+        <div>
+          <h1 style="font-size: 1.6rem; margin: 0; line-height: 1.1;">Galeri Jidan</h1>
+          <span class="brand-badge">Cloud Storage v2.0</span>
+        </div>
+      </div>
+
+      <p class="text-sub" style="text-align: center; font-size: 0.9rem; margin-bottom: 24px;">
+        Simpan foto berkualitas asli dengan enkripsi cloud yang aman dan akses mudah dari perangkat mana saja.
+      </p>
+
+      <!-- Auth Tabs -->
+      <div style="display: flex; background: rgba(255,255,255,0.05); padding: 4px; border-radius: var(--radius-sm); margin-bottom: 24px;">
+        <button id="tab-login" class="btn" style="flex: 1; padding: 8px; font-size: 0.88rem; background: var(--grad-primary); color: #fff;">Masuk</button>
+        <button id="tab-register" class="btn btn-secondary" style="flex: 1; padding: 8px; font-size: 0.88rem; border: none;">Daftar Baru</button>
+      </div>
+
+      <!-- Login Form -->
+      <form id="form-login">
+        <div class="form-group">
+          <label class="form-label" for="login-email">Email</label>
+          <input type="email" id="login-email" class="form-control" placeholder="nama@email.com" required />
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="login-password">Password</label>
+          <input type="password" id="login-password" class="form-control" placeholder="••••••••" required />
+        </div>
+        <button type="submit" id="btn-submit-login" class="btn btn-primary" style="width: 100%; padding: 12px; margin-top: 8px;">
+          Masuk ke Vault
+        </button>
+      </form>
+
+      <!-- Register Form -->
+      <form id="form-register" style="display: none;">
+        <div class="form-group">
+          <label class="form-label" for="reg-name">Nama Lengkap</label>
+          <input type="text" id="reg-name" class="form-control" placeholder="Budi Pratama" required />
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="reg-email">Email</label>
+          <input type="email" id="reg-email" class="form-control" placeholder="nama@email.com" required />
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="reg-password">Password Baru</label>
+          <input type="password" id="reg-password" class="form-control" placeholder="Minimal 6 karakter" minlength="6" required />
+        </div>
+        <button type="submit" id="btn-submit-reg" class="btn btn-primary" style="width: 100%; padding: 12px; margin-top: 8px;">
+          Buat Akun Vault
+        </button>
+      </form>
+
+      <!-- Quick Demo Access / Supabase Setup -->
+      <div style="margin-top: 24px; padding-top: 20px; border-top: 1px solid var(--border-subtle); text-align: center;">
+        <button id="btn-instant-demo" class="btn btn-secondary" style="width: 100%; font-size: 0.88rem; margin-bottom: 12px;">
+          ⚡ Coba Demo Langsung (Tanpa Registrasi)
+        </button>
+        <button id="btn-open-supabase-setup" style="background: none; border: none; color: var(--primary); font-size: 0.82rem; cursor: pointer; text-decoration: underline;">
+          ⚙️ Konfigurasi URL & Kunci Supabase
+        </button>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- ==================== MAIN APPLICATION VIEW ==================== -->
+  <div id="view-app" class="app-container" style="display: none;">
+    
+    <!-- DESKTOP SIDEBAR -->
+    <aside class="sidebar">
+      <div class="sidebar-brand">
+        <div class="brand-icon">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2">
+            <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path>
+            <circle cx="12" cy="13" r="4"></circle>
+          </svg>
+        </div>
+        <div style="flex: 1; min-width: 0;">
+          <div class="brand-title">Galeri Jidan</div>
+          <span id="sidebar-mode-badge" class="brand-badge">Demo Mode</span>
+        </div>
+      </div>
+
+      <ul class="nav-list">
+        <li>
+          <a class="nav-link active" id="nav-gallery">
+            <svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg>
+            <span>Galeri Foto</span>
+          </a>
+        </li>
+        <li>
+          <a class="nav-link" id="nav-upload-trigger">
+            <svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
+            <span>Unggah Foto</span>
+          </a>
+        </li>
+        <li>
+          <a class="nav-link" id="nav-storage-btn">
+            <svg viewBox="0 0 24 24"><ellipse cx="12" cy="5" rx="9" ry="3"></ellipse><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"></path><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"></path></svg>
+            <span>Kapasitas Cloud</span>
+          </a>
+        </li>
+        <li>
+          <a class="nav-link" id="nav-settings-btn">
+            <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+            <span>Pengaturan</span>
+          </a>
+        </li>
+      </ul>
+
+      <!-- Storage Info Card in Sidebar -->
+      <div class="sidebar-storage-card">
+        <div style="display: flex; justify-content: space-between; font-size: 0.8rem; font-weight: 700;">
+          <span>Penyimpanan</span>
+          <span id="sidebar-storage-text" class="text-sub">0 MB / 5 GB</span>
+        </div>
+        <div class="storage-bar-wrapper">
+          <div id="sidebar-storage-bar" class="storage-bar" style="width: 0%;"></div>
+        </div>
+        <div style="font-size: 0.72rem; color: var(--text-muted); display: flex; justify-content: space-between;">
+          <span id="sidebar-photo-count">0 foto</span>
+          <a href="#" id="link-upgrade-tier" style="color: var(--primary); text-decoration: none; font-weight: 600;">Kelola</a>
+        </div>
+      </div>
+
+      <!-- User Profile Card -->
+      <div class="user-profile-widget">
+        <div id="user-avatar-badge" class="user-avatar">U</div>
+        <div class="user-info">
+          <div id="user-display-name" class="user-name">Pengguna</div>
+          <div id="user-display-email" class="user-email">email@vault.com</div>
+        </div>
+        <button id="btn-logout" class="btn btn-secondary btn-icon" title="Keluar">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
+        </button>
+      </div>
+    </aside>
+
+    <!-- MOBILE TOP BAR -->
+    <header class="mobile-top-bar">
+      <div style="display: flex; align-items: center; gap: 10px;">
+        <div class="brand-icon" style="width: 32px; height: 32px; border-radius: 8px;">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><circle cx="12" cy="13" r="4"></circle></svg>
+        </div>
+        <span style="font-weight: 800; font-size: 1.1rem;">Galeri Jidan</span>
+      </div>
+      <div style="display: flex; align-items: center; gap: 8px;">
+        <button id="mobile-settings-btn" class="btn btn-secondary btn-icon" style="width: 36px; height: 36px;">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"></circle></svg>
+        </button>
+        <button id="mobile-logout-btn" class="btn btn-secondary btn-icon" style="width: 36px; height: 36px;">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
+        </button>
+      </div>
+    </header>
+
+    <!-- MAIN WRAPPER -->
+    <main class="main-wrapper">
+      
+      <!-- Storage Capacity Warning Banner (Dynamic) -->
+      <div id="storage-alert-banner" style="display: none; padding: 12px 18px; border-radius: var(--radius-md); margin-bottom: 20px; align-items: center; justify-content: space-between; gap: 12px; background: rgba(245, 158, 11, 0.15); border: 1px solid rgba(245, 158, 11, 0.35); color: #fbbf24;">
+        <div style="display: flex; align-items: center; gap: 10px;">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
+          <span id="storage-alert-text" style="font-size: 0.88rem; font-weight: 600;">Kapasitas penyimpanan hampir habis!</span>
+        </div>
+        <button id="btn-banner-upgrade" class="btn btn-sm btn-primary" style="padding: 4px 10px; font-size: 0.78rem;">Tingkatkan</button>
+      </div>
+
+      <!-- Gallery Header -->
+      <div class="gallery-header">
+        <div class="gallery-header-top">
+          <div>
+            <h2 style="font-size: 1.35rem; margin-bottom: 2px;">Koleksi Foto Cloud</h2>
+            <p class="text-sub" style="font-size: 0.82rem;" id="gallery-subtitle">Memuat data foto...</p>
+          </div>
+          <div style="display: flex; gap: 8px;">
+            <button id="btn-toggle-select-mode" class="btn btn-secondary btn-sm" title="Pilih Banyak">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><polyline points="9 11 12 14 22 4"></polyline></svg>
+              <span>Pilih</span>
+            </button>
+            <button id="btn-open-upload" class="btn btn-primary btn-sm desktop-only-upload">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+              <span>Unggah</span>
+            </button>
+          </div>
+        </div>
+
+        <div class="header-search-sort">
+          <div class="search-box">
+            <svg viewBox="0 0 24 24" fill="none" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+            <input type="text" id="search-input" placeholder="Cari nama foto..." />
+          </div>
+
+          <select id="sort-select" class="sort-select">
+            <option value="newest">Terbaru</option>
+            <option value="oldest">Terlama</option>
+            <option value="name_asc">Nama (A-Z)</option>
+            <option value="size_desc">Ukuran</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Bulk Selection Bar -->
+      <div id="bulk-selection-bar" class="bulk-selection-bar">
+        <div style="display: flex; align-items: center; gap: 14px;">
+          <span id="selected-count-badge" style="font-weight: 700; font-size: 0.95rem; color: #fff;">0 foto terpilih</span>
+          <button id="btn-select-all" class="btn btn-secondary btn-sm">Pilih Semua</button>
+          <button id="btn-deselect-all" class="btn btn-secondary btn-sm">Batal Pilih</button>
+        </div>
+        <div style="display: flex; gap: 10px;">
+          <button id="btn-bulk-delete" class="btn btn-danger btn-sm">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+            <span>Hapus Terpilih</span>
+          </button>
+          <button id="btn-cancel-select-mode" class="btn btn-secondary btn-sm">Selesai</button>
+        </div>
+      </div>
+
+      <!-- Photos Grid -->
+      <div id="photos-grid" class="photo-grid"></div>
+
+      <!-- Empty State -->
+      <div id="empty-gallery-state" class="empty-state" style="display: none;">
+        <div class="empty-icon-wrapper">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="2">
+            <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+            <circle cx="8.5" cy="8.5" r="1.5"></circle>
+            <polyline points="21 15 16 10 5 21"></polyline>
+          </svg>
+        </div>
+        <h3 style="font-size: 1.25rem; margin-bottom: 8px;">Belum Ada Foto Tersimpan</h3>
+        <p class="text-sub" style="font-size: 0.9rem; max-width: 400px; margin-bottom: 24px;">
+          Ambil foto dari perangkat atau drag & drop file ke sini untuk menyimpan foto dalam kualitas aslinya.
+        </p>
+        <button id="btn-empty-upload" class="btn btn-primary" style="padding: 12px 24px;">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
+          Mulai Unggah Foto
+        </button>
+      </div>
+
+    </main>
+
+    <!-- MOBILE BOTTOM NAVIGATION -->
+    <nav class="mobile-bottom-nav">
+      <a class="mobile-nav-item active" id="m-nav-gallery">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg>
+        <span>Galeri</span>
+      </a>
+
+      <button id="m-nav-upload" class="mobile-nav-upload-btn" title="Unggah Foto">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+      </button>
+
+      <a class="mobile-nav-item" id="m-nav-storage">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><ellipse cx="12" cy="5" rx="9" ry="3"></ellipse><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"></path><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"></path></svg>
+        <span>Storage</span>
+      </a>
+
+      <a class="mobile-nav-item" id="m-nav-settings">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+        <span>Akun</span>
+      </a>
+    </nav>
+  </div>
+
+
+  <!-- ==================== UPLOAD MODAL ==================== -->
+  <div id="modal-upload" class="modal-backdrop">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 style="font-size: 1.15rem;">Unggah Foto ke Cloud</h3>
+        <button class="btn btn-secondary btn-icon btn-sm modal-close" title="Tutup">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+        </button>
+      </div>
+
+      <div class="modal-body">
+        <!-- Hidden input for file picker -->
+        <input type="file" id="file-picker" multiple accept="image/jpeg,image/png,image/webp,image/heic,image/heif" style="display: none;" />
+
+        <!-- Dropzone -->
+        <div id="dropzone" class="dropzone">
+          <div class="dropzone-icon">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
+          </div>
+          <h4 style="font-size: 1rem; margin-bottom: 6px;">Pilih atau Tarik Foto ke Sini</h4>
+          <p class="text-sub" style="font-size: 0.82rem;">Mendukung multi-file & mempertahankan resolusi asli</p>
+          <div class="file-format-pills">
+            <span class="pill">JPG</span>
+            <span class="pill">JPEG</span>
+            <span class="pill">PNG</span>
+            <span class="pill">WEBP</span>
+            <span class="pill">HEIC (iOS)</span>
+          </div>
+        </div>
+
+        <!-- Upload Queue items -->
+        <div id="upload-queue-container" style="display: none; margin-top: 20px;">
+          <div style="display: flex; justify-content: space-between; font-size: 0.85rem; font-weight: 700; margin-bottom: 8px;">
+            <span id="queue-header-status">Antrean Unggah</span>
+            <span id="queue-count-badge" class="text-sub">0/0</span>
+          </div>
+          <div id="upload-queue-list" class="upload-queue-list"></div>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button id="btn-select-files" class="btn btn-secondary">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="12" y1="18" x2="12" y2="12"></line><line x1="9" y1="15" x2="15" y2="15"></line></svg>
+          Pilih File Lain
+        </button>
+        <button id="btn-start-upload" class="btn btn-primary" style="display: none;">
+          Mulai Unggah Semua
+        </button>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- ==================== PHOTO VIEWER (LIGHTBOX) ==================== -->
+  <div id="modal-viewer" class="viewer-modal">
+    <div class="viewer-topbar">
+      <div style="display: flex; align-items: center; gap: 12px; min-width: 0;">
+        <span id="viewer-index-pill" class="brand-badge">1 / 1</span>
+        <span id="viewer-title" class="viewer-title">foto.jpg</span>
+      </div>
+      <div style="display: flex; gap: 8px;">
+        <button id="btn-viewer-zoom-in" class="btn btn-secondary btn-icon btn-sm" title="Perbesar">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line><line x1="11" y1="8" x2="11" y2="14"></line><line x1="8" y1="11" x2="14" y2="11"></line></svg>
+        </button>
+        <button id="btn-viewer-zoom-out" class="btn btn-secondary btn-icon btn-sm" title="Perkecil">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line><line x1="8" y1="11" x2="14" y2="11"></line></svg>
+        </button>
+        <button id="btn-viewer-close" class="btn btn-secondary btn-icon btn-sm" title="Tutup (Esc)">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+        </button>
+      </div>
+    </div>
+
+    <div class="viewer-canvas" id="viewer-canvas">
+      <button id="btn-viewer-prev" class="viewer-nav-btn viewer-prev" title="Foto Sebelumnya">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"></polyline></svg>
+      </button>
+
+      <img id="viewer-image" class="viewer-img" src="" alt="Photo Preview" />
+
+      <button id="btn-viewer-next" class="viewer-nav-btn viewer-next" title="Foto Selanjutnya">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"></polyline></svg>
+      </button>
+    </div>
+
+    <div class="viewer-bottombar">
+      <div style="display: flex; align-items: center; gap: 16px; font-size: 0.8rem; color: var(--text-sub);">
+        <span id="viewer-meta-size">2.4 MB</span>
+        <span>•</span>
+        <span id="viewer-meta-res">1920 x 1080</span>
+        <span>•</span>
+        <span id="viewer-meta-date">18 Okt 2026</span>
+      </div>
+
+      <div style="display: flex; align-items: center; gap: 10px;">
+        <button id="btn-viewer-rename" class="btn btn-secondary btn-sm">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg>
+          Ganti Nama
+        </button>
+        <button id="btn-viewer-download" class="btn btn-primary btn-sm">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+          Unduh Asli
+        </button>
+        <button id="btn-viewer-delete" class="btn btn-danger btn-sm">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+          Hapus
+        </button>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- ==================== RENAME MODAL ==================== -->
+  <div id="modal-rename" class="modal-backdrop">
+    <div class="modal-content" style="max-width: 420px;">
+      <div class="modal-header">
+        <h3 style="font-size: 1.1rem;">Ganti Nama Foto</h3>
+        <button class="btn btn-secondary btn-icon btn-sm modal-close" title="Tutup">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label class="form-label" for="rename-input">Nama File Baru</label>
+          <input type="text" id="rename-input" class="form-control" />
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary modal-close">Batal</button>
+        <button id="btn-save-rename" class="btn btn-primary">Simpan</button>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- ==================== DELETE CONFIRMATION MODAL ==================== -->
+  <div id="modal-delete-confirm" class="modal-backdrop">
+    <div class="modal-content" style="max-width: 440px;">
+      <div class="modal-header">
+        <h3 style="font-size: 1.1rem; color: #fb7185;">Konfirmasi Hapus Foto</h3>
+        <button class="btn btn-secondary btn-icon btn-sm modal-close" title="Tutup">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+        </button>
+      </div>
+      <div class="modal-body">
+        <p id="delete-confirm-message" style="font-size: 0.92rem; line-height: 1.5; color: var(--text-main);">
+          Apakah Anda yakin ingin menghapus foto ini? File akan dihapus permanen dari cloud storage dan tidak dapat dikembalikan.
+        </p>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary modal-close">Batal</button>
+        <button id="btn-confirm-delete" class="btn btn-danger">Hapus Permanen</button>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- ==================== STORAGE USAGE MODAL ==================== -->
+  <div id="modal-storage" class="modal-backdrop">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 style="font-size: 1.15rem;">Kapasitas Cloud Storage</h3>
+        <button class="btn btn-secondary btn-icon btn-sm modal-close" title="Tutup">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div style="background: rgba(255,255,255,0.03); border: 1px solid var(--border-subtle); border-radius: var(--radius-md); padding: 18px; margin-bottom: 20px;">
+          <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 8px;">
+            <span style="font-size: 1.4rem; font-weight: 800;" id="storage-modal-used">0 MB</span>
+            <span class="text-sub" style="font-size: 0.88rem;" id="storage-modal-total">dari 5.0 GB</span>
+          </div>
+          <div class="storage-bar-wrapper" style="height: 10px;">
+            <div id="storage-modal-bar" class="storage-bar" style="width: 0%;"></div>
+          </div>
+          <div style="display: flex; justify-content: space-between; font-size: 0.78rem; color: var(--text-muted); margin-top: 8px;">
+            <span id="storage-modal-percentage">0% terpakai</span>
+            <span id="storage-modal-free">5.0 GB tersisa</span>
+          </div>
+        </div>
+
+        <h4 style="font-size: 0.95rem; margin-bottom: 10px;">Pilihan Paket Penyimpanan</h4>
+        <div class="tier-grid">
+          <div class="tier-card active" data-tier="free">
+            <div style="display: flex; justify-content: space-between; margin-bottom: 6px;">
+              <span style="font-weight: 700; font-size: 0.92rem;">Gratis</span>
+              <span class="brand-badge">Aktif</span>
+            </div>
+            <div style="font-size: 1.25rem; font-weight: 800; color: #fff;">5 GB</div>
+            <p class="text-muted" style="font-size: 0.75rem; margin-top: 4px;">Penyimpanan standar untuk kebutuhan pribadi.</p>
+          </div>
+
+          <div class="tier-card" data-tier="pro">
+            <div style="display: flex; justify-content: space-between; margin-bottom: 6px;">
+              <span style="font-weight: 700; font-size: 0.92rem;">Pro Vault</span>
+              <span style="font-size: 0.7rem; color: var(--blue-accent);">Populer</span>
+            </div>
+            <div style="font-size: 1.25rem; font-weight: 800; color: #fff;">50 GB</div>
+            <p class="text-muted" style="font-size: 0.75rem; margin-top: 4px;">Untuk ribuan foto iPhone resolusi tinggi.</p>
+          </div>
+
+          <div class="tier-card" data-tier="ultra">
+            <div style="display: flex; justify-content: space-between; margin-bottom: 6px;">
+              <span style="font-weight: 700; font-size: 0.92rem;">Ultra Vault</span>
+              <span style="font-size: 0.7rem; color: var(--purple-accent);">Maksimal</span>
+            </div>
+            <div style="font-size: 1.25rem; font-weight: 800; color: #fff;">200 GB</div>
+            <p class="text-muted" style="font-size: 0.75rem; margin-top: 4px;">Cadangan menyeluruh koleksi foto keluarga.</p>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary modal-close">Tutup</button>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- ==================== SETTINGS MODAL ==================== -->
+  <div id="modal-settings" class="modal-backdrop">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 style="font-size: 1.15rem;">Pengaturan Galeri Jidan</h3>
+        <button class="btn btn-secondary btn-icon btn-sm modal-close" title="Tutup">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+        </button>
+      </div>
+      <div class="modal-body">
+        
+        <!-- App Status & PWA Install -->
+        <div style="background: rgba(99, 102, 241, 0.08); border: 1px solid rgba(99, 102, 241, 0.25); border-radius: var(--radius-md); padding: 16px; margin-bottom: 20px;">
+          <div style="display: flex; align-items: center; justify-content: space-between;">
+            <div>
+              <div style="font-weight: 700; font-size: 0.95rem;">Aplikasi Mobile (PWA / APK)</div>
+              <div class="text-sub" style="font-size: 0.8rem; margin-top: 2px;">Dapat dipasang ke Home Screen iOS & Android</div>
+            </div>
+            <button id="btn-pwa-install" class="btn btn-sm btn-primary" style="display: none;">
+              Pasang App
+            </button>
+          </div>
+        </div>
+
+        <!-- Supabase Cloud Connection Settings -->
+        <div style="border: 1px solid var(--border-subtle); border-radius: var(--radius-md); padding: 18px; margin-bottom: 20px;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+            <h4 style="font-size: 0.95rem; margin: 0;">Koneksi Supabase Backend</h4>
+            <span id="settings-conn-status" class="brand-badge" style="background: rgba(16, 185, 129, 0.2); color: #34d399; border-color: rgba(16, 185, 129, 0.4);">
+              Demo Mode Aktif
+            </span>
+          </div>
+          <p class="text-sub" style="font-size: 0.8rem; margin-bottom: 14px;">
+            Masukkan Project URL dan Anon Key untuk menghubungkan PhotoVault langsung ke database & storage Supabase Anda.
+          </p>
+
+          <div class="form-group">
+            <label class="form-label" for="cfg-supabase-url">Supabase Project URL</label>
+            <input type="url" id="cfg-supabase-url" class="form-control" placeholder="https://xyzcompany.supabase.co" />
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="cfg-supabase-key">Supabase Anon Public Key</label>
+            <input type="password" id="cfg-supabase-key" class="form-control" placeholder="eyJhbGciOiJIUzI1NiIsInR5cCI6..." />
+          </div>
+
+          <div style="display: flex; gap: 10px; margin-top: 14px;">
+            <button id="btn-test-supabase" class="btn btn-secondary btn-sm" style="flex: 1;">
+              Uji Koneksi
+            </button>
+            <button id="btn-save-supabase" class="btn btn-primary btn-sm" style="flex: 1;">
+              Simpan & Hubungkan
+            </button>
+          </div>
+          <button id="btn-reset-supabase" style="background: none; border: none; color: var(--text-muted); font-size: 0.78rem; cursor: pointer; margin-top: 10px; text-decoration: underline;">
+            Kembalikan ke Demo Mode
+          </button>
+        </div>
+
+        <!-- Local Cache Cleanup -->
+        <div style="border: 1px solid var(--border-subtle); border-radius: var(--radius-md); padding: 18px;">
+          <h4 style="font-size: 0.95rem; margin-bottom: 6px;">Pembersihan Cache Lokal</h4>
+          <p class="text-sub" style="font-size: 0.8rem; margin-bottom: 12px;">
+            Hapus thumbnail lokal dan cache sementara browser untuk menghemat ruang perangkat.
+          </p>
+          <button id="btn-clear-cache" class="btn btn-secondary btn-sm">
+            Bersihkan Cache Lokal
+          </button>
+        </div>
+
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary modal-close">Selesai</button>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- ==================== TOAST NOTIFICATION CONTAINER ==================== -->
+  <div id="toast-container" class="toast-container"></div>
+
+  <!-- Main JavaScript App Entry -->
+</body>
+</html>
